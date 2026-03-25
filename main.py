@@ -12,4 +12,7 @@ attributes = {
     "Defense": 5,
 }
 
+player = Creature(attributes)
+
+print(player.accesStat("HP"))
 
