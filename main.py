@@ -1,9 +1,8 @@
-#TODO: Make a Creature high level class with stats
     #TODO: Make a Player and Enemy child class with loot for enemy and inventory for player
 #TODO: Make a function that starts a fight
 
 import utility
-from utility import makeDictionaryTable, clearWindow
+from utility import Player
 
 attributes = {
     "HP": 100,
@@ -12,7 +11,7 @@ attributes = {
     "Defense": 5,
 }
 
-player = Creature(attributes)
+player = Player(attributes)
 
 print(player.accesStat("HP"))
 

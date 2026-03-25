@@ -15,6 +15,12 @@ def clearWindow():
     else:
         os.system("clear")
 
+def compareStats(stat1, stat2):
+    if stat1 > stat2:
+        return True
+    else:
+        return False
+
 class Creature:
     def __init__(self, statsDict):
         self.stats = statsDict
@@ -23,5 +29,25 @@ class Creature:
         for key in self.stats:
             if statKey in key:
                 return self.stats[key]
+
+class Player(Creature):
+    def __init__(self, statsDict, inventoryList=[]):
+        self.inventoryList = inventoryList
+        super().__init__(statsDict)
+
+    def accesInventory(self, index):
+        return self.inventoryList[index]
+
+class Enemy(Creature):
+    def __init__(self, statsDict, lootTable):
+        self.lootTable = lootTable
+        super().__init__(statsDict)
+
+    def accesLootDict(self, index):
+        return self.lootTable[index]
+
+
+
+
 
 
