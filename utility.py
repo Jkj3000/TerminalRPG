@@ -1,7 +1,11 @@
 from beautifultable import BeautifulTable
+from samba.samba3.mdscli import conn
 from termcolor import colored
 import os
+from abc import ABC, abstractmethod
 
+
+# Support Functions
 def makeDictionaryTable(dictionary):
     table = BeautifulTable()
     table.columns.header = ["Stat", "Value"]
@@ -21,6 +25,8 @@ def compareStats(stat1, stat2):
     else:
         return False
 
+
+# Creatutes
 class Creature:
     def __init__(self, statsDict):
         self.stats = statsDict
@@ -48,6 +54,51 @@ class Enemy(Creature):
 
 
 
+# Scene classes
+class Scene(ABC):
+    def __init__(self, name):
+        self.name = name
+
+    @abstractmethod
+    def display(self):
+        pass
+
+    @abstractmethod
+    def handleCommand(self, command):
+        pass
+
+class MainScreen(Scene):
+    def display(self):
+        print(colored("---Main Screen---", "yellow"))
+        print("Commands: adventure, shop, city, quit")
+
+    def handleCommand(self, command):
+        if command == "adventure":
+            pass
+        elif command == "shop":
+            pass
+        elif command == "city":
+            pass
+
+class Shop(Scene):
+    def __init__(self, shopDict):
+        self.shopDict = shopDict
+        super().__init__()
+
+    def display(self):
+        print(colored("---Shop---", "yellow"))
+        print("How to purchase:\nType 1-n to purchase if you have enough gold")
+        print(makeDictionaryTable(self.shopDict))
+
+    def handleCommand(self, command):
+        pass
+
+class City(Scene):
+    def display(self):
+        print(colored("---City---", "yellow"))
+
+    def handleCommand(self, command):
+        pass
 
 
-
+# Action Classes
