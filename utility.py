@@ -7,5 +7,3 @@ def makeDictionaryTable(dictionary):
     for key, value in dictionary.items():
         table.rows.append([key, colored(value, "red")])
     return table
-
-
