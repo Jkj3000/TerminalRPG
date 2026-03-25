@@ -12,5 +12,4 @@ attributes = {
     "Defense": 5,
 }
 
-print(makeDictionaryTable(attributes))
 
