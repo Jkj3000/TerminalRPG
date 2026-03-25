@@ -15,3 +15,13 @@ def clearWindow():
     else:
         os.system("clear")
 
+class Creature:
+    def __init__(self, statsDict):
+        self.stats = statsDict
+
+    def accesStat(self, statKey):
+        for key in self.stats:
+            if statKey in key:
+                return self.stats[key]
+
+

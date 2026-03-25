@@ -3,7 +3,7 @@
 #TODO: Make a function that starts a fight
 
 import utility
-from utility import makeDictionaryTable, clearWindow
+from utility import makeDictionaryTable, clearWindow, Creature
 
 attributes = {
     "HP": 100,
@@ -12,5 +12,7 @@ attributes = {
     "Defense": 5,
 }
 
-print(makeDictionaryTable(attributes))
+player = Creature(attributes)
+
+print(player.accesStat("HP"))
 
