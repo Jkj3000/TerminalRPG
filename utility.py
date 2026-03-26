@@ -71,6 +71,7 @@ class MainScreen(Scene):
     def display(self):
         print(colored("---Main Screen---", "yellow"))
         print("Commands: adventure, shop, city, quit")
+        print(makeDictionaryTable(player.a))
 
     def handleCommand(self, command):
         if command == "adventure":
@@ -102,3 +103,4 @@ class City(Scene):
 
 
 # Action Classes
+def
