@@ -1,5 +1,4 @@
 from beautifultable import BeautifulTable
-from samba.samba3.mdscli import conn
 from termcolor import colored
 import os
 from abc import ABC, abstractmethod
@@ -28,79 +27,76 @@ def compareStats(stat1, stat2):
 
 # Creatutes
 class Creature:
-    def __init__(self, statsDict):
+    def __init__(self, statsDict, inventoryDict=[]):
         self.stats = statsDict
+        self.inventoryDict = inventoryDict
 
     def accesStat(self, statKey):
         for key in self.stats:
             if statKey in key:
                 return self.stats[key]
 
-class Player(Creature):
-    def __init__(self, statsDict, inventoryList=[]):
-        self.inventoryList = inventoryList
-        super().__init__(statsDict)
+    def accesInventoryDict(self, index):
+        return self.inventoryDict[index]
 
-    def accesInventory(self, index):
-        return self.inventoryList[index]
+class Player(Creature):
+    pass
 
 class Enemy(Creature):
-    def __init__(self, statsDict, lootTable):
-        self.lootTable = lootTable
-        super().__init__(statsDict)
-
-    def accesLootDict(self, index):
-        return self.lootTable[index]
-
-
+    pass
 
 # Scene classes
 class Scene(ABC):
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, game):
+        self.game = game
 
     @abstractmethod
     def display(self):
         pass
 
     @abstractmethod
-    def handleCommand(self, command):
+    def handleAction(self, command, args=""):
         pass
 
-class MainScreen(Scene):
+class Main(Scene):
+    def __init__(self, game):
+        super().__init__(game)
     def display(self):
         print(colored("---Main Screen---", "yellow"))
         print("Commands: adventure, shop, city, quit")
-        print(makeDictionaryTable(player.a))
+        print(makeDictionaryTable(self.game.player.stats))
 
-    def handleCommand(self, command):
+    def handleAction(self, command, args=""):
         if command == "adventure":
-            pass
-        elif command == "shop":
-            pass
-        elif command == "city":
-            pass
+            self.game.enter_scene("adventure")
+        if command == "shop":
+            self.game.enter_scene("shop")
+        if command == "city":
+            self.game.enter_scene("city")
+        if command == "stats":
+            makeDictionaryTable(self.game.player.stats)
 
 class Shop(Scene):
-    def __init__(self, shopDict):
-        self.shopDict = shopDict
-        super().__init__()
+    def __init__(self, game):
+        self.shopDict = {}
+        super().__init__(game)
 
     def display(self):
         print(colored("---Shop---", "yellow"))
         print("How to purchase:\nType 1-n to purchase if you have enough gold")
         print(makeDictionaryTable(self.shopDict))
 
-    def handleCommand(self, command):
+    def handleAction(self, command, args=""):
         pass
 
-class City(Scene):
+class Adventure(Scene):
+    def __init__(self, game):
+        super().__init__(game)
+
     def display(self):
-        print(colored("---City---", "yellow"))
+        print(colored("---Adventure---", "yellow"))
 
-    def handleCommand(self, command):
+    def handleAction(self, command, args=""):
         pass
-
 
 # Action Classes
-def
