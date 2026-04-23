@@ -24,7 +24,7 @@ class Game:
             "quit": self.quit_game
         }
 
-    def enter_screen(self, sceneName):
+    def enter_scene(self, sceneName):
         # Transition to a different screen
         if sceneName in self.scenes:
             self.currentScene = self.scenes[sceneName]
@@ -63,6 +63,7 @@ class Game:
 
         while self.running:
             try:
+                clear_window()
                 self.currentScene.display()
                 user_input = input(">> ").strip()
                 self.process_action(user_input)
