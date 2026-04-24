@@ -76,26 +76,29 @@ class Game:
 
 
 if __name__ == "__main__":
-    # Welcoming message
-    welcomeMessage = f"This is the {colored("TerminalRPG", "yellow")}! Here you will find basic gameplay but it was made with love!"
-    for char in welcomeMessage:
-        print(char, end="", flush=True)
-        time.sleep(.05)
-    print()
-    time.sleep(0.5)
+    # FOR TESTING
+    skip = input("skip? [y/n]: ")
+    if skip != "y":
+        # Welcoming message
+        welcomeMessage = f"This is the {colored("TerminalRPG", "yellow")}! Here you will find basic gameplay but it was made with love!"
+        for char in welcomeMessage:
+            print(char, end="", flush=True)
+            time.sleep(.05)
+        print()
+        time.sleep(0.5)
 
-    instructionMessage = f"In this game all of the {colored("actions", "yellow")} you do are determined by the {colored("terms", "yellow")} you type into the {colored("input field", "yellow")}"
-    for char in instructionMessage:
-        print(char, end="", flush=True)
-        time.sleep(.05)
-    time.sleep(0.5)
-    print("\nGood Luck!")
+        instructionMessage = f"In this game all of the {colored("actions", "yellow")} you do are determined by the {colored("terms", "yellow")} you type into the {colored("input field", "yellow")}"
+        for char in instructionMessage:
+            print(char, end="", flush=True)
+            time.sleep(.05)
+        time.sleep(0.5)
+        print("\nGood Luck!")
 
-    statInput = "But first we need you to enter your stats as a player"
-    for char in statInput:
-        print(char, end="", flush=True)
-        time.sleep(.05)
-    print("")
+        statInput = "But first we need you to enter your stats as a player"
+        for char in statInput:
+            print(char, end="", flush=True)
+            time.sleep(.05)
+        print("")
 
     # Making stats
     statsToEnter = ["HP", "DMG", "DEF"]

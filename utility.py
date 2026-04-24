@@ -2,18 +2,33 @@ from beautifultable import BeautifulTable
 from termcolor import colored
 import os
 from abc import ABC, abstractmethod
-
+##TODO: Add table gen for lists
+##TODO: Add shop scene
+    ##TODO: Add display of items
+    ##TODO: Add purchace
+##TODO: add player inventory
 
 # Support Functions
-def make_dictionary_table(dictionary):
-    if type(dictionary) == dict:
+def make_dictionary_table(data, headersList):
+    if type(data) == dict:
         table = BeautifulTable()
-        table.columns.header = ["Stat", "Value"]
-        for key, value in dictionary.items():
+        table.columns.header = headersList
+        for key, value in data.items():
             table.rows.append([key, colored(value, "red")])
         return table
-    elif type(dictionary) == list:
-        pass
+    elif type(data) == list:
+        table = BeautifulTable()
+        table.columns.header = headersList
+        index = 0
+        for dictOfItem in data:
+            nameOfItem = ""
+            priceOfItem = ""
+            for key, value in dictOfItem.items():
+                nameOfItem = key
+                priceOfItem = value
+            table.rows.append([index, colored(nameOfItem, "blue"), colored(priceOfItem, "green")])
+            index += 1
+        return table
 
 def clear_window():
     if os.name == "nt":
@@ -33,9 +48,9 @@ def compare_stats(stat1, stat2):
 
 # Creatutes
 class Creature:
-    def __init__(self, statsDict, inventoryDict=[]):
+    def __init__(self, statsDict, inventoryList=[]):
         self.stats = statsDict
-        self.inventoryDict = inventoryDict
+        self.inventoryDict = inventoryList
 
     def accesStat(self, statKey):
         for key in self.stats:
@@ -73,8 +88,8 @@ class Main(Scene):
         super().__init__(game)
     def display(self):
         print(colored("---Main Screen---", "yellow"))
-        print("Commands: adventure, shop, city, quit")
-        print(make_dictionary_table(self.game.player.stats))
+        print("Commands: adventure, inventory, city, quit")
+        print(make_dictionary_table(self.game.player.stats, ["Stat", "Value"]))
 
     def handleAction(self, command, args=""):
         if command == "adventure":
@@ -84,10 +99,13 @@ class Main(Scene):
         if command == "city":
             self.game.enter_scene("city")
         if command == "stats":
-            make_dictionary_table(self.game.player.stats)
+            make_dictionary_table(self.game.player.stats, ["Stat", "Value"])
+        if command == "inventory":
+            make_dictionary_table(self.game.player.inventoryDict)
 
 class Shop(Scene):
-    listOfShopItems = [
+    def __init__(self, game):
+        self.shopList = [
         {"Basic Sword": 10},
         {"Medium Sword": 100},
         {"Epic Sword": 500},
@@ -95,25 +113,20 @@ class Shop(Scene):
         {"Basic Shield": 100},
         {"Medium Shield": 500},
         {"Epic Shield": 5000},
-        {"Legendary Shield": 8000},
+        {"Legendary Shield": 8000}
     ]
-
-    def __init__(self, game):
-        self.shopDict = {}
         super().__init__(game)
 
     def display(self):
         # Text
-
-        make_dictionary_table(self.shopDict)
         print(colored("---Shop---", "yellow"))
         print("Commands: main, buy 1-n, inventory")
         print("How to purchase:\nType 1-n to purchase if you have enough gold")
-        print(make_dictionary_table(self.shopDict))
+        print(make_dictionary_table(self.shopList, ["Index", "Item", "Price"]))
 
     def handleAction(self, command, args=""):
         if command == "main":
-            self.game.change_scene("main")
+            self.game.enter_scene("main")
         if command == "buy":
             pass
 
@@ -124,12 +137,11 @@ class Adventure(Scene):
 
     def display(self):
         print(colored("---Adventure---", "yellow"))
+        print("Commands: main, battle, quit")
 
     def handleAction(self, command, args=""):
-        pass
-
-
-
+        if command == "main":
+            self.game.enter_scene("main")
 
 
 # Action Classes
