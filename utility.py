@@ -50,7 +50,7 @@ def compare_stats(stat1, stat2):
 class Creature:
     def __init__(self, statsDict, inventoryList=[]):
         self.stats = statsDict
-        self.inventoryDict = inventoryList
+        self.inventoryListOfDict = inventoryList
 
     def accesStat(self, statKey):
         for key in self.stats:
@@ -58,7 +58,7 @@ class Creature:
                 return self.stats[key]
 
     def accesInventoryDict(self, index):
-        return self.inventoryDict[index]
+        return self.inventoryListOfDict[index]
 
 class Player(Creature):
     pass
@@ -101,7 +101,7 @@ class Main(Scene):
         if command == "stats":
             make_dictionary_table(self.game.player.stats, ["Stat", "Value"])
         if command == "inventory":
-            make_dictionary_table(self.game.player.inventoryDict)
+            make_dictionary_table(self.game.player.inventoryListOfDict)
 
 class Shop(Scene):
     def __init__(self, game):
@@ -123,6 +123,7 @@ class Shop(Scene):
         print("Commands: main, buy 1-n, inventory")
         print("How to purchase:\nType 1-n to purchase if you have enough gold")
         print(make_dictionary_table(self.shopList, ["Index", "Item", "Price"]))
+        print(make_dictionary_table(self.game.player.inventoryListOfDict, ["Index", "Name", "Description"]))
 
     def handleAction(self, command, args=""):
         if command == "main":
