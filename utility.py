@@ -2,34 +2,52 @@ from beautifultable import BeautifulTable
 from termcolor import colored
 import os
 from abc import ABC, abstractmethod
-##TODO: Add table gen for lists
 ##TODO: Add shop scene
-    ##TODO: Add display of items
     ##TODO: Add purchace
 ##TODO: add player inventory
 
 # Support Functions
 def make_dictionary_table(data, headersList):
-    if type(data) == dict:
-        table = BeautifulTable()
-        table.columns.header = headersList
-        for key, value in data.items():
-            table.rows.append([key, colored(value, "red")])
-        return table
-    elif type(data) == list:
-        table = BeautifulTable()
-        table.columns.header = headersList
-        index = 0
-        for dictOfItem in data:
-            nameOfItem = ""
-            priceOfItem = ""
-            for key, value in dictOfItem.items():
-                nameOfItem = key
-                priceOfItem = value
-            table.rows.append([index, colored(nameOfItem, "blue"), colored(priceOfItem, "green")])
-            index += 1
-        return table
+    table = BeautifulTable()
+    table.columns.header = headersList
 
+    if type(data) == dict:
+        if len(data) == 0:
+            # Add empty row for visibility
+            table.rows.append(["", ""])
+        else:
+            for key, value in data.items():
+                table.rows.append([key, colored(value, "red")])
+    elif type(data) == list:
+        if len(data) == 0:
+            # create empty row matching a 3- or 4-column layout
+            # use length of headers to decide columns
+            cols = len(headersList)
+            table.rows.append([""] * cols)
+        else:
+            index = 0
+            for dictOfItem in data:
+                nameOfItem = ""
+                priceOfItem = ""
+                buffs_str = ""
+                for key, value in dictOfItem.items():
+                    nameOfItem = key
+                    # value can be old-format price (int) or new-format dict
+                    if isinstance(value, dict):
+                        priceOfItem = value.get("price", "")
+                        buffs = value.get("buffs", {})
+                        if buffs:
+                            buffs_str = ", ".join([f"{k}+{v}" for k, v in buffs.items()])
+                    else:
+                        priceOfItem = value
+
+                # If headers expect 4 columns (Index, Name, Price, Buffs) include buffs column
+                if len(headersList) >= 4:
+                    table.rows.append([index, colored(nameOfItem, "blue"), colored(str(priceOfItem), "green"), buffs_str])
+                else:
+                    table.rows.append([index, colored(nameOfItem, "blue"), colored(str(priceOfItem), "green")])
+                index += 1
+    return table
 def clear_window():
     if os.name == "nt":
         os.system("cls")
@@ -60,6 +78,38 @@ class Creature:
     def accesInventoryDict(self, index):
         return self.inventoryListOfDict[index]
 
+    # New: apply buffs from an item (item in the same format used in shop/inventory)
+    def apply_buffs_from_item(self, item):
+        """
+        item is a dict with single key: name -> value
+        value may be int (old format) or dict with 'price' and optional 'buffs'
+        """
+        try:
+            info = list(item.values())[0]
+        except Exception:
+            return
+
+        if isinstance(info, dict):
+            buffs = info.get("buffs", {})
+            for stat, amount in buffs.items():
+                # Ensure stat key exists; if not, create it
+                if stat in self.stats:
+                    self.stats[stat] += amount
+                else:
+                    self.stats[stat] = amount
+
+    def remove_buffs_from_item(self, item):
+        try:
+            info = list(item.values())[0]
+        except Exception:
+            return
+
+        if isinstance(info, dict):
+            buffs = info.get("buffs", {})
+            for stat, amount in buffs.items():
+                if stat in self.stats:
+                    self.stats[stat] -= amount
+
 class Player(Creature):
     pass
 
@@ -89,7 +139,7 @@ class Main(Scene):
     def display(self):
         print(colored("---Main Screen---", "yellow"))
         print("Commands: adventure, inventory, city, quit")
-        print(make_dictionary_table(self.game.player.stats, ["Stat", "Value"]))
+        print(make_dictionary_table(self.game.player.inventoryListOfDict, ["Index", "Name", "Price", "Buffs"]))
 
     def handleAction(self, command, args=""):
         if command == "adventure":
@@ -101,35 +151,72 @@ class Main(Scene):
         if command == "stats":
             make_dictionary_table(self.game.player.stats, ["Stat", "Value"])
         if command == "inventory":
-            make_dictionary_table(self.game.player.inventoryListOfDict)
+            print(make_dictionary_table(self.game.player.inventoryListOfDict, ["Index", "Name", "Value"]))
+            input("Press Enter to continue...")
 
 class Shop(Scene):
     def __init__(self, game):
         self.shopList = [
-        {"Basic Sword": 10},
-        {"Medium Sword": 100},
-        {"Epic Sword": 500},
-        {"Legendary Sword": 5000},
-        {"Basic Shield": 100},
-        {"Medium Shield": 500},
-        {"Epic Shield": 5000},
-        {"Legendary Shield": 8000}
-    ]
+            {"Basic Sword": {"price": 10, "buffs": {"DMG": 2}}},
+            {"Medium Sword": {"price": 100, "buffs": {"DMG": 5}}},
+            {"Epic Sword": {"price": 500, "buffs": {"DMG": 15}}},
+            {"Legendary Sword": {"price": 5000, "buffs": {"DMG": 50}}},
+            {"Basic Shield": {"price": 100, "buffs": {"DEF": 2}}},
+            {"Medium Shield": {"price": 500, "buffs": {"DEF": 8}}},
+            {"Epic Shield": {"price": 5000, "buffs": {"DEF": 25}}},
+            {"Legendary Shield": {"price": 8000, "buffs": {"DEF": 80}}}
+        ]
         super().__init__(game)
 
     def display(self):
-        # Text
         print(colored("---Shop---", "yellow"))
-        print("Commands: main, buy 1-n, inventory")
-        print("How to purchase:\nType 1-n to purchase if you have enough gold")
-        print(make_dictionary_table(self.shopList, ["Index", "Item", "Price"]))
-        print(make_dictionary_table(self.game.player.inventoryListOfDict, ["Index", "Name", "Description"]))
+        print(f"Gold: {colored(str(self.game.player.accesStat('Gold')), 'yellow')}")
+        print("Commands: main, buy 0-n, inventory")
+        print("How to purchase:\nType 'buy n' where n is the item index")
+        print(make_dictionary_table(self.shopList, ["Index", "Item", "Price", "Buffs"]))
+        print(make_dictionary_table(self.game.player.inventoryListOfDict, ["Index", "Name", "Price", "Buffs"]))
 
     def handleAction(self, command, args=""):
         if command == "main":
             self.game.enter_scene("main")
         if command == "buy":
-            pass
+            if args == "":
+                print("Usage: buy <index>")
+                return
+
+            try:
+                index = int(args)
+                if 0 <= index < len(self.shopList):
+                    item = self.shopList[index]
+                    itemName = list(item.keys())[0]
+                    itemPrice = item[itemName]
+                    itemInfo = item[itemName]
+                    if isinstance(itemInfo, dict):
+                        itemPrice = itemInfo.get("price", 0)
+                    else:
+                        itemPrice = itemInfo
+                    playerGold = self.game.player.accesStat("Gold")
+
+                    if playerGold >= itemPrice:
+                        # Purchase successful
+                        self.game.player.inventoryListOfDict.append(item)
+                        # Apply buffs if present
+                        self.game.player.apply_buffs_from_item(item)
+
+                        # Deduct gold
+                        self.game.player.stats["Gold"] -= itemPrice
+                        self.shopList.pop(index)
+                        print(colored(f"Purchased {itemName} for {itemPrice} gold!", "green"))
+                        input("Press Enter to continue...")
+                    else:
+                        print(colored(f"Not enough gold! Need {itemPrice}, have {playerGold}", "red"))
+                        input("Press Enter to continue...")
+                else:
+                    print(colored("Invalid item index!", "red"))
+                    input("Press Enter to continue...")
+            except ValueError:
+                print(colored("Invalid command format. Use: buy <number>", "red"))
+                input("Press Enter to continue...")
 
 
 class Adventure(Scene):

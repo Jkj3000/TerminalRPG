@@ -1,6 +1,7 @@
 from utility import *
 from termcolor import colored
 import time
+import json
 
 class Game:
     def __init__(self, playerStats):
@@ -54,6 +55,7 @@ class Game:
         print("Type commands based on your current screen.\n")
 
     def quit_game(self, args):
+        self.save_game()
         print("Thanks for playing!")
         self.running = False
 
@@ -72,6 +74,29 @@ class Game:
                 self.running = False
             except Exception as e:
                 print(f"Error: {e}")
+
+    def save_game(self):
+        game_state = {
+            "player_stats": self.player.stats,
+            "player_inventory": self.player.inventoryListOfDict,
+            "shop_inventory": self.shopScene.shopList
+        }
+
+        with open("savegame.json", "w") as f:
+            json.dump(game_state, f, indent=4)
+        print("Game saved!")
+
+    def load_game(self):
+        try:
+            with open("savegame.json", "r") as f:
+                game_state = json.load(f)
+
+            self.player.stats = game_state["player_stats"]
+            self.player.inventoryListOfDict = game_state["player_inventory"]
+            self.shopScene.shopList = game_state["shop_inventory"]
+            return True
+        except FileNotFoundError:
+            return False
 
 
 
@@ -101,10 +126,14 @@ if __name__ == "__main__":
         print("")
 
     # Making stats
-    statsToEnter = ["HP", "DMG", "DEF"]
+    statsToEnter = ["HP", "DMG", "DEF", "Gold"]
     completedStats = {}
     for stat in statsToEnter:
         completedStats[stat] = int(input(f"Enter {stat}: "))
 
     game = Game(completedStats)
+    if game.load_game():
+        print("Save file loaded!")
+    else:
+        print("No save file found. Starting new game.")
     game.game_loop()
