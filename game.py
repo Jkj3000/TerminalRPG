@@ -60,7 +60,7 @@ class Game:
         self.running = False
 
     def game_loop(self):
-        """Main game loop"""
+        # Main game loop
         print(colored("Terminal RPG", "yellow"))
 
         while self.running:
